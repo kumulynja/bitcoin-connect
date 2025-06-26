@@ -1,17 +1,17 @@
-import {customElement, state} from 'lit/decorators.js';
-import {BitcoinConnectElement} from '../BitcoinConnectElement';
-import {withTwind} from '../twind/withTwind';
-import {html} from 'lit';
-import '../internal/bci-button';
-import {classes} from '../css/classes';
-import store from '../../state/store';
-import {nwa} from '@getalby/sdk';
-import {copiedIcon} from '../icons/copiedIcon';
-import {copyIcon} from '../icons/copyIcon';
-import qrcode from 'qrcode-generator';
-import {waitingIcon} from '../icons/waitingIcon';
+import { customElement, state } from "lit/decorators.js";
+import { BitcoinConnectElement } from "../BitcoinConnectElement";
+import { withTwind } from "../twind/withTwind";
+import { html } from "lit";
+import "../internal/bci-button";
+import { classes } from "../css/classes";
+import store from "../../state/store";
+import { nwa } from "@getalby/sdk";
+import { copiedIcon } from "../icons/copiedIcon";
+import { copyIcon } from "../icons/copyIcon";
+import qrcode from "qrcode-generator";
+import { waitingIcon } from "../icons/waitingIcon";
 
-@customElement('bc-flash-wallet')
+@customElement("bc-flash-wallet")
 export class FlashWalletPage extends withTwind()(BitcoinConnectElement) {
   @state()
   _authString: string | undefined;
@@ -39,14 +39,14 @@ export class FlashWalletPage extends withTwind()(BitcoinConnectElement) {
         <div
           class="px-8 pt-4 w-full flex flex-col items-center justify-center gap-4"
         >
-          <div class="mb-2 text-center ${classes['text-neutral-secondary']}">
+          <div class="mb-2 text-center ${classes["text-neutral-secondary"]}">
             Scan with your camera, QR code scanner app, or from the Flash Wallet
           </div>
 
           <div class="flex justify-center items-center">
-            ${waitingIcon(`w-7 h-7 ${classes['text-neutral-secondary']}`)}
+            ${waitingIcon(`w-7 h-7 ${classes["text-neutral-secondary"]}`)}
             <p class="${
-              classes['text-neutral-secondary']
+              classes["text-neutral-secondary"]
             }">Waiting for connection</p>
           </div>
 
@@ -59,10 +59,10 @@ export class FlashWalletPage extends withTwind()(BitcoinConnectElement) {
             class="
 flex gap-1 w-full
 mt-4
-${classes['text-brand-mixed']} ${classes.interactive} font-semibold text-xs"
+${classes["text-brand-mixed"]} ${classes.interactive} font-semibold text-xs"
           >
             ${this._hasCopiedAuthString ? copiedIcon : copyIcon}
-            ${this._hasCopiedAuthString ? 'Copied!' : 'Copy'}
+            ${this._hasCopiedAuthString ? "Copied!" : "Copy"}
           </bci-button>
         </div>
         </div>
@@ -78,18 +78,18 @@ ${classes['text-brand-mixed']} ${classes.interactive} font-semibold text-xs"
 
     // wait for the canvas to be added to the dom, then render it
     setTimeout(() => {
-      const canvas = this.shadowRoot?.getElementById('qr') as HTMLCanvasElement;
+      const canvas = this.shadowRoot?.getElementById("qr") as HTMLCanvasElement;
       if (!canvas) {
-        console.error('qr canvas not found');
+        console.error("qr canvas not found");
         return;
       }
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) {
-        console.error('could not get context for qr canvas');
+        console.error("could not get context for qr canvas");
         return;
       }
 
-      const errorCorrectionLevel = 'L';
+      const errorCorrectionLevel = "L";
       const qr = qrcode(0, errorCorrectionLevel);
       qr.addData(authString);
       qr.make();
@@ -106,7 +106,7 @@ ${classes['text-brand-mixed']} ${classes.interactive} font-semibold text-xs"
   }
 
   private _copyAuthString() {
-    console.log('copying auth string');
+    console.log("copying auth string");
     if (!this._authString) {
       return;
     }
@@ -129,20 +129,20 @@ ${classes['text-brand-mixed']} ${classes.interactive} font-semibold text-xs"
       if (!requestMethods) {
         // add some default request methods standard apps might need
         requestMethods = [
-          'get_info',
-          'get_balance',
-          'get_budget',
-          'pay_invoice',
-          'list_transactions',
-          'lookup_invoice',
-          'make_invoice',
+          "get_info",
+          "get_balance",
+          "get_budget",
+          "pay_invoice",
+          "list_transactions",
+          "lookup_invoice",
+          "make_invoice",
         ];
       }
 
       const nwaClient = new nwa.NWAClient({
         name: this._appName,
         icon: this._appIcon,
-        relayUrl: 'wss://relay.paywithflash.com',
+        relayUrl: "wss://nwclay.paywithflash.com",
         requestMethods,
         notificationTypes: authorizationUrlOptions?.notificationTypes,
         maxAmount: authorizationUrlOptions?.maxAmount,
@@ -157,32 +157,31 @@ ${classes['text-brand-mixed']} ${classes.interactive} font-semibold text-xs"
 
       this._authString = nwaClient.connectionUri;
 
-
       // try to open in native app
       window.location.href = this._authString;
 
-      const {unsub} = await nwaClient.subscribe({
+      const { unsub } = await nwaClient.subscribe({
         onSuccess: async (nwcClient) => {
-          console.log('nwcClient.nostrWalletConnectUrl', nwcClient);
+          console.log("nwcClient.nostrWalletConnectUrl", nwcClient);
           nwcClient.close();
           // TODO: it makes no sense to connect again
           store.getState().connect({
             nwcUrl: nwcClient.nostrWalletConnectUrl,
-            connectorName: 'Flash Wallet',
-            connectorType: 'nwc.flash',
+            connectorName: "Flash Wallet",
+            connectorType: "nwc.flash",
           });
         },
       });
       this._unsub = unsub;
     } catch (error) {
       console.error(error);
-      alert('' + error);
+      alert("" + error);
     }
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bc-flash-wallet': FlashWalletPage;
+    "bc-flash-wallet": FlashWalletPage;
   }
 }
